@@ -10,6 +10,12 @@ class ReviewSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
+        # get audience type (Ex: Sinh viên, cặp đôi, hội nhóm,...) if any
+        audience_type = response.css('div.audiences::text').get().strip()
+
+        # get extra shop's details
+        
+
         # get score
         scores = response.xpath('//*[contains(concat( " ", @class, " " ), concat( " ", "micro-home-static", " " ))]//b/text()').extract()
         score_by_standards = {"Vị trí": float(scores[0]), 
@@ -52,6 +58,4 @@ class ReviewSpider(scrapy.Spider):
 
             # get user's 5 score
 
-
-        # print(comment_types)
         yield scores
