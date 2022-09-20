@@ -20,11 +20,14 @@ class ReviewSpider(scrapy.Spider):
         
         # get type of comment (excellent, good, average, bad?)
         comment_clf = response.xpath('//*[contains(concat( " ", @class, " " ), concat( " ", "rating-levels", " " ))]//b/text()').extract() 
-        comment_type = {"Excellent": int(comment_clf[0].strip()), 
+        comment_types = {"Excellent": int(comment_clf[0].strip()), 
                         "Good": int(comment_clf[1].strip()), 
                         "Average": int(comment_clf[2].strip()), 
                         "Bad": int(comment_clf[3].strip())}
         
+        # get fb views
+        n_views_fb = response.xpath('//*[contains(concat( " ", @class, " " ), concat( " ", "total-views", " " ))]//span/text()').get()
+
         # get user's info
         all_users = response.xpath('//*[contains(concat( " ", @class, " " ), concat( " ", "review-item", " " ))]').getall()
         for user in all_users: # 10 user/pass
@@ -32,16 +35,23 @@ class ReviewSpider(scrapy.Spider):
 
             # get username
             username = user_selector.xpath('//*[contains(concat( " ", @class, " " ), concat( " ", "ru-username", " " ))]').get()
-            clean_username = Selector(text=username).xpath('//span/text()').getall()[1]
+            try:
+                clean_username = Selector(text=username).xpath('//span/text()').getall()[1]
+            except: # no more reviews 
+                break 
 
             # get comment date
             date = user_selector.xpath('//*[contains(concat( " ", @class, " " ), concat( " ", "ru-time", " " ))]').get()
             clean_date = Selector(text=date).xpath('//span/text()').get()
 
-            # get title
-            //*[contains(concat( " ", @class, " " ), concat( " ", "ng-binding", " " )) and contains(concat( " ", @class, " " ), concat( " ", "ng-scope", " " ))]
+            # get comment's title
+            clean_title = user_selector.css('a.rd-title span::text').get()
 
             # get comment
+            clean_comment = user_selector.css('div.rd-des span::text').get()
 
-        print(comment_type)
+            # get user's 5 score
+
+
+        # print(comment_types)
         yield scores
