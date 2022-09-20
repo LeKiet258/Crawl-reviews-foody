@@ -14,7 +14,27 @@ class ReviewSpider(scrapy.Spider):
         audience_type = response.css('div.audiences::text').get().strip()
 
         # get extra shop's details
-        
+        info_area = response.css('div.new-detail-info-area')
+        res_info = response.css('div.microsite-res-info-properties li:not([class])')
+
+        #get title in detail info 
+        titles = [info_label.css('div.new-detail-info-label::text').get().strip() for info_label in info_area]
+        microsite_info = [micro_info.css('a::text').get().strip() for micro_info in res_info]
+
+        info = dict()
+
+        for i in range(len(titles)):
+            span_tag_info = info_area[i].css('span:not([class])::text').get()
+            a_tag_info = info_area[i].css('a[href]::text').getall()
+            
+            if len(a_tag_info) == 0:
+                info[titles[i]] = span_tag_info.strip()
+            else:
+                info[titles[i]] = ','.join(a_tag_info)
+                info[titles[i]] = info[titles[i]].strip()
+
+        info['Extra Info'] = ','.join(microsite_info)
+        #yield info
 
         # get score
         scores = response.xpath('//*[contains(concat( " ", @class, " " ), concat( " ", "micro-home-static", " " ))]//b/text()').extract()
